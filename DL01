@@ -1,0 +1,224 @@
+boston
+
+# In[1]:
+
+
+import pandas as pd
+import numpy as np
+from sklearn import metrics
+import matplotlib.pyplot as plt
+import seaborn as sns
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# In[2]:
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+
+# In[3]:
+
+
+
+from sklearn.datasets import fetch_california_housing
+boston = fetch_california_housing()
+data = pd.DataFrame(boston.data)
+
+
+# In[4]:
+
+
+data.head()
+
+
+# In[5]:
+
+
+data.columns = boston.feature_names
+data.head()
+
+
+# In[6]:
+
+
+data.shape
+
+
+# In[7]:
+
+
+data['PRICE'] = boston.target
+
+
+# In[8]:
+
+
+data.columns
+
+
+# In[9]:
+
+
+data.dtypes
+
+
+# In[10]:
+
+
+data.head
+
+
+# In[11]:
+
+
+data.nunique()
+
+
+# In[12]:
+
+
+data.isnull().sum()
+
+
+# In[13]:
+
+
+data.describe()
+
+
+# In[14]:
+
+
+corr = data.corr()
+
+
+# In[15]:
+
+
+corr.shape
+
+
+# In[16]:
+
+
+plt.figure(figsize=(20,20))
+
+
+# In[17]:
+
+
+sns.heatmap(corr, cbar=True, square= False, fmt='.1f', annot=True,annot_kws={'size':15}, cmap='Oranges')
+
+
+# In[18]:
+
+
+X = data.drop(['PRICE'], axis = 1)
+y = data['PRICE']
+
+
+# In[19]:
+
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y, test_size = 0.3,
+random_state = 4)
+
+
+# In[20]:
+
+
+from sklearn.linear_model import LinearRegression
+
+
+# In[21]:
+
+
+lm = LinearRegression()
+lm.fit(X_train, y_train)
+
+
+# In[22]:
+
+
+lm.intercept_
+
+
+# In[23]:
+
+
+coeffcients = pd.DataFrame([X_train.columns,lm.coef_]).T
+coeffcients = coeffcients.rename(columns={0: 'Attribute', 1: 'Coefficients'})
+coeffcients
+
+
+# In[24]:
+
+
+y_pred = lm.predict(X_train)
+
+
+# In[25]:
+
+
+print('R^2:',metrics.r2_score(y_train, y_pred))
+print('Adjusted R^2:',1 - (1-metrics.r2_score(y_train,
+y_pred))*(len(y_train)-1)/(len(y_train)-X_train.shape[1]-1))
+print('MAE:',metrics.mean_absolute_error(y_train, y_pred))
+print('MSE:',metrics.mean_squared_error(y_train, y_pred))
+print('RMSE:',np.sqrt(metrics.mean_squared_error(y_train, y_pred)))
+
+
+# In[26]:
+
+
+plt.scatter(y_train, y_pred)
+plt.xlabel("Prices")
+plt.ylabel("Predicted prices")
+plt.title("Prices vs Predicted prices")
+plt.show()
+
+
+# In[27]:
+
+
+plt.scatter(y_pred,y_train-y_pred)
+plt.title("Predicted vs residuals")
+plt.xlabel("Predicted")
+plt.ylabel("Residuals")
+plt.show()
+
+
+# In[28]:
+
+
+sns.distplot(y_train-y_pred)
+plt.title("Histogram of Residuals")
+plt.xlabel("Residuals")
+plt.ylabel("Frequency")
+plt.show()
+
+
+# In[29]:
+
+
+y_test_pred = lm.predict(X_test)
+
+
+# In[30]:
+
+
+acc_linreg = metrics.r2_score(y_test, y_test_pred)
+print('R^2:', acc_linreg)
+print('Adjusted R^2:',1 - (1-metrics.r2_score(y_test,
+y_test_pred))*(len(y_test)-1)/(len(y_test)-X_test.shape[1]-1))
+print('MAE:',metrics.mean_absolute_error(y_test, y_test_pred))
+print('MSE:',metrics.mean_squared_error(y_test, y_test_pred))
+print('RMSE:',np.sqrt(metrics.mean_squared_error(y_test, y_test_pred)))
+
+
+# In[ ]:
+
+
